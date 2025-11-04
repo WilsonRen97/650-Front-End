@@ -1,0 +1,207 @@
+/* ClipUI.css */
+
+.clip-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  color: #333;
+}
+
+.clip-title {
+  text-align: center;
+  font-size: 2rem;
+  margin-bottom: 30px;
+}
+
+.clip-grid {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-bottom: 40px;
+}
+
+/* Container Card */
+.clip-card {
+  flex: 1 1 300px;
+  background: linear-gradient(145deg, #ffffff, #f0f4f8);
+  padding: 25px;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08), 0 4px 10px rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.clip-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.12), 0 6px 15px rgba(0, 0, 0, 0.06);
+}
+
+/* Card Title */
+.clip-card-title {
+  font-size: 1.4rem;
+  margin-bottom: 20px;
+  font-weight: 700;
+  color: #1a1a1a;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+/* Textarea */
+.clip-textarea {
+  width: 100%;
+  height: 120px;
+  padding: 12px 5px;
+  font-size: 1rem;
+  border-radius: 12px;
+  border: 1px solid #d1d9e6;
+  background-color: #fefefe;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.03);
+  resize: none;
+  margin-bottom: 20px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.clip-textarea:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 8px rgba(0, 123, 255, 0.2);
+  outline: none;
+}
+
+/* Button */
+.clip-btn {
+  padding: 12px 25px;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.clip-btn-blue {
+  background: linear-gradient(135deg, #007bff, #00a1ff);
+  color: white;
+  box-shadow: 0 6px 15px rgba(0, 123, 255, 0.3);
+}
+
+.clip-btn-blue:hover {
+  background: linear-gradient(135deg, #0056b3, #0080e0);
+  box-shadow: 0 8px 20px rgba(0, 123, 255, 0.35);
+  transform: translateY(-2px);
+}
+
+.clip-img-section {
+  margin-top: 20px;
+}
+
+.clip-img-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 15px;
+}
+
+.clip-img-wrapper {
+  overflow: hidden;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  aspect-ratio: 16 / 10; /* forces width > height */
+}
+
+.clip-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.clip-img-wrapper:hover .clip-img {
+  transform: scale(1.25);
+}
+
+/* Modal Overlay */
+.clip-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+/* Full image inside modal */
+.clip-modal-img {
+  max-width: 90%;
+  max-height: 90%;
+  border-radius: 8px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+/* Close button */
+.clip-modal-close {
+  position: absolute;
+  top: 20px;
+  right: 30px;
+  font-size: 2rem;
+  color: white;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.clip-modal-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 2rem;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.3);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
+  outline: none;
+  z-index: 10;
+}
+
+.clip-modal-arrow:hover {
+  background: rgba(0, 0, 0, 0.8);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.clip-modal-arrow-left {
+  left: 2rem;
+}
+.clip-modal-arrow-right {
+  right: 2rem;
+}
+
+.bubble {
+  position: absolute;
+  pointer-events: none;
+  animation: bubble-pop 1s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1001;
+  opacity: 0.8;
+}
+
+@keyframes bubble-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.5) translateY(0);
+  }
+  30% {
+    opacity: 1;
+    transform: scale(1.2) translateY(-10px);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.5) translateY(-40px);
+  }
+}

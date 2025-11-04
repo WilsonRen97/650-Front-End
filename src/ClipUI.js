@@ -6,6 +6,8 @@ export default function ClipUI() {
   const [text, setText] = useState("");
   const [selectedImage, setSelectedImage] = useState(null); // for modal
   const [displayImages, setDisplayImages] = useState([]);
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearchImage, setIsSearchImage] = useState(false); // track if selected image is from search results
 
   useEffect(() => {
     fetch(process.env.PUBLIC_URL + "/images.json")
@@ -16,25 +18,12 @@ export default function ClipUI() {
           thumbnailURL: process.env.PUBLIC_URL + `/thumbnails/${name}`,
         }));
 
-        // Pick 32 random images once
-        const shuffled = [...imagePaths].sort(() => 0.5 - Math.random());
-        setDisplayImages(shuffled.slice(0, 32));
+        const startIndex = Math.floor(
+          Math.random() * Math.max(0, imagePaths.length - 32)
+        );
+        setDisplayImages(imagePaths.slice(startIndex, startIndex + 32));
       });
   }, []);
-
-  // 新增 Esc 鍵關閉 modal 的事件監聽
-  useEffect(() => {
-    if (!selectedImage) return;
-
-    const handleEsc = (e) => {
-      if (e.key === "Escape") {
-        setSelectedImage(null);
-      }
-    };
-
-    window.addEventListener("keydown", handleEsc);
-    return () => window.removeEventListener("keydown", handleEsc);
-  }, [selectedImage]);
 
   useEffect(() => {
     if (!selectedImage) return;
@@ -44,43 +33,53 @@ export default function ClipUI() {
         setSelectedImage(null);
       }
       if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
-        const currentIdx = displayImages.findIndex(
-          (img) => img.url === selectedImage
-        );
+        const images = isSearchImage ? searchResults : displayImages;
+        const currentIdx = images.findIndex((img) => img.url === selectedImage);
         if (currentIdx === -1) return;
+
         if (e.key === "ArrowLeft") {
-          const prevIdx =
-            (currentIdx - 1 + displayImages.length) % displayImages.length;
-          setSelectedImage(displayImages[prevIdx].url);
+          const prevIdx = (currentIdx - 1 + images.length) % images.length;
+          setSelectedImage(images[prevIdx].url);
         }
         if (e.key === "ArrowRight") {
-          const nextIdx = (currentIdx + 1) % displayImages.length;
-          setSelectedImage(displayImages[nextIdx].url);
+          const nextIdx = (currentIdx + 1) % images.length;
+          setSelectedImage(images[nextIdx].url);
         }
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [selectedImage, displayImages]);
+  }, [selectedImage, isSearchImage, searchResults, displayImages]);
 
   const handleSearch = () => {
     console.log("Searching text:", text);
-    // Here you can filter or trigger a search on your images based on the text
+    fetch("http://localhost:5001/embed-text", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ text }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("Search results:", data);
+        const searchImagePaths = data.filenames.map((name) => ({
+          url: process.env.PUBLIC_URL + `/images/${name}`,
+          thumbnailURL: process.env.PUBLIC_URL + `/thumbnails/${name}`,
+        }));
+        setSearchResults(searchImagePaths);
+      })
+      .catch((err) => {
+        console.error("Error during search:", err);
+      });
   };
 
   return (
     <div className="clip-container">
-      <h1
-        className="clip-title"
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-      >
-        CLIP Album Generation System
-      </h1>
+      <h1 className="clip-title">CLIP Album Generation System</h1>
 
       <div className="clip-grid">
-        {/* Text Search */}
         <div className="clip-card">
           <h2 className="clip-card-title">Search with Text</h2>
           <textarea
@@ -95,16 +94,42 @@ export default function ClipUI() {
         </div>
       </div>
 
-      {/* Display Images */}
+      {searchResults.length > 0 && (
+        <div className="clip-img-section">
+          <h2 className="clip-card-title">Search Results</h2>
+          <div className="clip-img-grid">
+            {searchResults.map((img, idx) => (
+              <div
+                key={idx}
+                className="clip-img-wrapper"
+                onClick={() => {
+                  setSelectedImage(img.url);
+                  setIsSearchImage(true); // mark as search image
+                }}
+              >
+                <img
+                  src={img.thumbnailURL}
+                  alt={`search-img-${idx}`}
+                  className="clip-img"
+                  style={{ cursor: "pointer" }}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="clip-img-section">
         <h2 className="clip-card-title">Random 32 Images from Folder</h2>
         <div className="clip-img-grid">
-          {/* randomly select 32 images to display */}
           {displayImages.map((img, idx) => (
             <div
               key={idx}
               className="clip-img-wrapper"
-              onClick={() => setSelectedImage(img.url)}
+              onClick={() => {
+                setSelectedImage(img.url);
+                setIsSearchImage(false); // mark as random image
+              }}
             >
               <img
                 src={img.thumbnailURL}
@@ -117,7 +142,6 @@ export default function ClipUI() {
         </div>
       </div>
 
-      {/* Modal for full image */}
       <AnimatePresence>
         {selectedImage && (
           <motion.div
@@ -132,32 +156,31 @@ export default function ClipUI() {
             >
               ×
             </button>
-            {/* 左箭頭 */}
             <button
               className="clip-modal-arrow clip-modal-arrow-left"
               onClick={() => {
-                const currentIdx = displayImages.findIndex(
+                const images = isSearchImage ? searchResults : displayImages;
+                const currentIdx = images.findIndex(
                   (img) => img.url === selectedImage
                 );
                 if (currentIdx === -1) return;
                 const prevIdx =
-                  (currentIdx - 1 + displayImages.length) %
-                  displayImages.length;
-                setSelectedImage(displayImages[prevIdx].url);
+                  (currentIdx - 1 + images.length) % images.length;
+                setSelectedImage(images[prevIdx].url);
               }}
             >
               &#8592;
             </button>
-            {/* 右箭頭 */}
             <button
               className="clip-modal-arrow clip-modal-arrow-right"
               onClick={() => {
-                const currentIdx = displayImages.findIndex(
+                const images = isSearchImage ? searchResults : displayImages;
+                const currentIdx = images.findIndex(
                   (img) => img.url === selectedImage
                 );
                 if (currentIdx === -1) return;
-                const nextIdx = (currentIdx + 1) % displayImages.length;
-                setSelectedImage(displayImages[nextIdx].url);
+                const nextIdx = (currentIdx + 1) % images.length;
+                setSelectedImage(images[nextIdx].url);
               }}
             >
               &#8594;
